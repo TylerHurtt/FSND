@@ -12,6 +12,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from flask_migrate import Migrate
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -19,16 +21,28 @@ from forms import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# app = Flask(__name__)
+
+# app.config.from_object('config')
+# app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://Tyler:Pesthlos!2772@localhost:5432/fyyur'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.debug = True
+
 db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
 
+migrate = Migrate(app, db)
+
 #----------------------------------------------------------------------------#
-# Models....
+# Models.
 #----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -38,11 +52,15 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    shows = db.relationship('Show', backref='show')
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
+    def __repr__(self):
+        return f'<Venue{self.id} {self.name} {self.city}>'
+
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -52,10 +70,29 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    shows = db.relationship('Show', backref='show')
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
+    def __repr__(self):
+        return f'<Artist{self.id} {self.name}>'
+
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+    __tablename__ = 'shows'
+
+    id = db.Column(db.Integer, primary_key=True)
+    date_time = db.Column(db.DateTime)
+    venue_id = db.Column(db.Integer,  db.ForeignKey(
+        'venues.id'), nullable=False)
+    artist_id = db.Column(db.Integer,  db.ForeignKey(
+        'artists.id'), nullable=False)
+
+    
+    def __repr__(self):
+        return f'<Show{self.id} {self.time} venId:{self.venue_id} artistId:{self.artist_id}>'
+
+
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -220,10 +257,37 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
+  error = False
+  body = {}
+  try:
+      data = request.form
+      print('=====>', data['name'])
+      # list_id = request.c['listId']
+      # todo = Todo(description=description, list_id=list_id)
+      # db.session.add(todo)
+      # db.session.commit()
+      # body = {
+      #     'id': todo.id,
+      #     'description': todo.description,
+      #     'list_id': todo.list_id
+      # }
+      # on successful db insert, flash success
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+      # db.session.rollback()
+      # error = True
+      # print(sys.exc_info())
+      # TODO: on unsuccessful db insert, flash an error instead.
+      flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  # finally:
+  #     db.session.close()
+  if error:
+      abort(400)
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  # else:
+  #     return jsonify(body)
   # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
