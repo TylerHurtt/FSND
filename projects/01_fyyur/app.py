@@ -325,6 +325,10 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   # TODO: replace with real data returned from querying the database
+  artists = Artist.query.all()
+
+  print('artists ==>', artists)
+
   data=[{
     "id": 4,
     "name": "Guns N Petals",
@@ -335,7 +339,7 @@ def artists():
     "id": 6,
     "name": "The Wild Sax Band",
   }]
-  return render_template('pages/artists.html', artists=data)
+  return render_template('pages/artists.html', artists=artists)
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
@@ -593,9 +597,6 @@ def create_show_submission():
 
     artist = Artist.query.filter(Artist.id == show.artist_id).one().name
     venue = Venue.query.filter(Venue.id == show.venue_id).one().name
-
-    # print('artist', artist)
-    # print('venue', venue)
 
     db.session.add(show)
     db.session.commit()
