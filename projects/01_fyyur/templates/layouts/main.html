@@ -117,6 +117,26 @@
   <script>window.jQuery || document.write('<script type="text/javascript" src="/static/js/libs/jquery-1.11.1.min.js"><\/script>')</script>
   <script type="text/javascript" src="/static/js/libs/bootstrap-3.1.1.min.js" defer></script>
   <script type="text/javascript" src="/static/js/plugins.js" defer></script>
+  <script type="text/javascript" defer>
+    const deleteBtn = document.querySelector('#delete-venue');
+    console.log(window.location);
+
+    deleteBtn.onclick = () => {
+      const param = window.location.pathname.split('/').reduce((acc, curr) => acc = curr)
+      console.log(window.location)
+      console.log(param)
+      fetch(`/venues/${param}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+      })
+        .then((res) =>
+          window.location.replace(`${window.location.origin}/`)
+        )
+        .catch((err) => console.error(err));
+    };
+  </script>
 
 </body>
 </html>

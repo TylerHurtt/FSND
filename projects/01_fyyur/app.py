@@ -330,10 +330,6 @@ def delete_venue(venue_id):
   try:
     venue = Venue.query.filter(Venue.id == venue_id).first()
     venue_name = venue.name
-   
-    for genre in venue.genres:
-      db.session.delete(genre)
-
     for show in venue.shows:
       db.session.delete(show)
 
@@ -356,7 +352,6 @@ def delete_venue(venue_id):
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  # return redirect(url_for('/'))
   return redirect(url_for('index'))
 
 #  Artists
@@ -579,9 +574,7 @@ def create_artist_submission():
     artist = Artist(name=data['name'], city=data['city'], state=data['state'], phone=data['phone'], facebook_link=data['facebook_link'])
     
     for genre in genres:
-      print(genre)
       new_genre = db.session.query(Genre).filter(Genre.name == genre).one()
-      print(new_genre.name)
       artist.genres.append(new_genre)
     
     db.session.add(artist)
